@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftPass - One Nation, One Ticket</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- QR Code Generation Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hero-glow {
+            box-shadow: 0 0 80px 30px #4f46e533;
+        }
+        .scroll-animation {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .scroll-animation.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Styles for the ticket modal */
+        #ticketModal {
+            transition: opacity 0.3s ease;
+        }
+        .ticket-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-left: 8px solid #4f46e5;
+        }
+        .ticket-hole {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header id="header" class="bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50 shadow-sm transition-all duration-300">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M12 22c-4 0-6.5-2-7-5l-1-3.5a1 1 0 0 1 1-1.5h14a1 1 0 0 1 1 1.5l-1 3.5c-.5 3-3 5-7 5Z"/><path d="M2 12h20"/><path d="m19 12-2-8-4-2-4 2-2 8"/><path d="M12 12v10"/></svg>
+                    <span class="text-2xl font-bold text-gray-900">SwiftPass</span>
+                </div>
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="text-gray-600 hover:text-indigo-600 transition">Home</a>
+                    <a href="#generate-ticket" class="text-gray-600 hover:text-indigo-600 transition">Generate Ticket</a>
+                    <a href="#about" class="text-gray-600 hover:text-indigo-600 transition">About Us</a>
+                    <a href="#contact" class="text-gray-600 hover:text-indigo-600 transition">Contact</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                     <a href="#" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-sm hidden sm:block">Download App</a>
+                     <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100">
+                        <i data-lucide="menu"></i>
+                     </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/80 backdrop-blur-md">
+            <a href="#home" class="block py-2 text-gray-600 hover:text-indigo-600">Home</a>
+            <a href="#generate-ticket" class="block py-2 text-gray-600 hover:text-indigo-600">Generate Ticket</a>
+            <a href="#about" class="block py-2 text-gray-600 hover:text-indigo-600">About Us</a>
+            <a href="#contact" class="block py-2 text-gray-600 hover:text-indigo-600">Contact</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="pt-24 md:pt-32 container mx-auto px-6 text-center">
+            <!-- ... existing hero section code ... -->
+            <div class="max-w-4xl mx-auto">
+                <span class="inline-block bg-indigo-100 text-indigo-700 text-sm font-semibold px-4 py-1 rounded-full mb-4">One Nation, One Ticket</span>
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">Seamless Travel Across India.</h1>
+                <p class="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
+                    SwiftPass unifies public transport with a single QR code ticket for any bus, metro, or ferry. Say goodbye to queues and hello to smarter, cashless commutes.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <a href="#" class="flex items-center justify-center bg-gray-800 text-white w-full sm:w-auto px-6 py-3 rounded-lg hover:bg-gray-900 transition">
+                        <i data-lucide="apple" class="w-6 h-6 mr-3"></i>
+                        <div>
+                            <p class="text-xs">Download on the</p>
+                            <p class="text-lg font-semibold">App Store</p>
+                        </div>
+                    </a>
+                    <a href="#" class="flex items-center justify-center bg-gray-800 text-white w-full sm:w-auto px-6 py-3 rounded-lg hover:bg-gray-900 transition">
+                        <i data-lucide="play-circle" class="w-6 h-6 mr-3"></i>
+                        <div>
+                            <p class="text-xs">GET IT ON</p>
+                            <p class="text-lg font-semibold">Google Play</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-12 md:mt-16 flex justify-center scroll-animation">
+                <div class="relative w-full max-w-3xl">
+                    <div class="absolute inset-0 bg-indigo-500 rounded-full blur-3xl opacity-20 hero-glow"></div>
+                    <img src="https://placehold.co/1200x675/E0E7FF/4F46E5?text=SwiftPass+App+Interface" alt="SwiftPass App on a Smartphone" class="relative rounded-2xl shadow-2xl border-4 border-gray-200">
+                </div>
+            </div>
+        </section>
+
+        <!-- Generate Ticket Section -->
+        <section id="generate-ticket" class="py-20 md:py-28 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="max-w-2xl mx-auto text-center">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Create Your Ticket</h2>
+                    <p class="mt-4 text-gray-600">Fill in your journey details to instantly generate a universal travel pass.</p>
+                </div>
+                <div class="mt-12 max-w-xl mx-auto">
+                    <form id="ticket-form" class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 space-y-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <input type="text" id="name" name="name" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="from" class="block text-sm font-medium text-gray-700">From</label>
+                            <input type="text" id="from" name="from" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="to" class="block text-sm font-medium text-gray-700">To</label>
+                            <input type="text" id="to" name="to" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <button type="submit" id="submit-ticket" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                            Generate My Ticket
+                        </button>
+                    </form>
+                </div>
+
+                <!-- My Tickets Section -->
+                <div id="my-tickets" class="mt-16 max-w-4xl mx-auto">
+                    <h3 class="text-2xl font-bold text-gray-900 text-center">My Recent Tickets</h3>
+                    <div id="ticket-history" class="mt-6 space-y-4">
+                        <p class="text-center text-gray-500">Your generated tickets will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="about" class="py-20 md:py-28 bg-gray-100">
+            <!-- ... existing about section code ... -->
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="scroll-animation">
+                        <img src="https://placehold.co/600x400/E0E7FF/4F46E5?text=Modern+Indian+Cityscape" alt="Modern Indian city with public transport" class="rounded-xl shadow-lg">
+                    </div>
+                    <div class="scroll-animation">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Simplifying Urban Mobility</h2>
+                        <p class="mt-4 text-lg text-gray-600">
+                            SwiftPass is a forward-thinking technology company dedicated to simplifying and unifying public transportation across India. We address the challenges of urban mobility by providing a single, seamless mobile platform for all travel needs.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact/Footer Section -->
+        <footer id="contact" class="bg-gray-800 text-white">
+            <!-- ... existing footer section code ... -->
+            <div class="container mx-auto px-6 py-16">
+                <div class="grid md:grid-cols-3 gap-12">
+                     <div>
+                        <div class="flex items-center space-x-2">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><path d="M12 22c-4 0-6.5-2-7-5l-1-3.5a1 1 0 0 1 1-1.5h14a1 1 0 0 1 1 1.5l-1 3.5c-.5 3-3 5-7 5Z"/><path d="M2 12h20"/><path d="m19 12-2-8-4-2-4 2-2 8"/><path d="M12 12v10"/></svg>
+                           <span class="text-2xl font-bold">SwiftPass</span>
+                        </div>
+                        <p class="mt-4 text-gray-400">Making urban travel faster, smarter, and completely cashless for millions.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-white">Quick Links</h4>
+                        <ul class="mt-4 space-y-2">
+                            <li><a href="#about" class="text-gray-400 hover:text-white">About Us</a></li>
+                            <li><a href="#generate-ticket" class="text-gray-400 hover:text-white">Generate Ticket</a></li>
+                        </ul>
+                    </div>
+                     <div>
+                        <h4 class="font-semibold text-lg text-white">Contact Us</h4>
+                        <ul class="mt-4 space-y-3">
+                            <li class="flex items-center text-gray-400"><i data-lucide="map-pin" class="w-5 h-5 mr-3"></i><span>Mumbai, Maharashtra, India</span></li>
+                            <li class="flex items-center text-gray-400"><i data-lucide="mail" class="w-5 h-5 mr-3"></i><a href="mailto:contact@swiftpass.co.in" class="hover:text-white">contact@swiftpass.co.in</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-12 border-t border-gray-700 pt-8 text-center text-gray-500">
+                    <p>&copy; <span id="year"></span> SwiftPass Technologies Pvt. Ltd. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </main>
+    
+    <!-- Ticket Modal -->
+    <div id="ticketModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-100 rounded-2xl shadow-2xl w-full max-w-sm m-auto overflow-hidden relative">
+             <div class="ticket-hole top-1/2 -left-4 -translate-y-1/2"></div>
+             <div class="ticket-hole top-1/2 -right-4 -translate-y-1/2"></div>
+
+            <div class="p-6">
+                <div class="text-center">
+                     <div class="flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M12 22c-4 0-6.5-2-7-5l-1-3.5a1 1 0 0 1 1-1.5h14a1 1 0 0 1 1 1.5l-1 3.5c-.5 3-3 5-7 5Z"/><path d="M2 12h20"/><path d="m19 12-2-8-4-2-4 2-2 8"/><path d="M12 12v10"/></svg>
+                        <span class="text-2xl font-bold text-gray-900">SwiftPass</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1">Universal Travel Pass</p>
+                </div>
+                <div class="my-6 border-t-2 border-dashed border-gray-300"></div>
+                <div class="space-y-4 text-gray-700">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-500">Passenger</span>
+                        <strong id="modal-name" class="text-right"></strong>
+                    </div>
+                     <div class="flex justify-between">
+                        <span class="font-medium text-gray-500">From</span>
+                        <strong id="modal-from" class="text-right"></strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-500">To</span>
+                        <strong id="modal-to" class="text-right"></strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-500">Issued</span>
+                        <strong id="modal-date" class="text-right"></strong>
+                    </div>
+                </div>
+                 <div class="my-6 border-t-2 border-dashed border-gray-300"></div>
+                <div class="flex flex-col items-center">
+                    <div id="modal-qrcode" class="p-2 bg-white rounded-lg shadow-md"></div>
+                    <p id="modal-ticket-id" class="text-xs text-gray-400 mt-2"></p>
+                </div>
+            </div>
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Core Page Interactivity ---
+        lucide.createIcons();
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // --- Firebase Setup ---
+        let db, auth, userId;
+        const appId = 'swiftpass-demo';
+
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+        apiKey: "AIzaSyB3cUqNXKNJDymavACVp0rnD6l4v2MrLWQ",
+        authDomain: "swiftpass-live.firebaseapp.com",
+        projectId: "swiftpass-live",
+        storageBucket: "swiftpass-live.firebasestorage.app",
+        messagingSenderId: "927041210415",
+        appId: "1:927041210415:web:6407cff657126750179eda",
+        measurementId: "G-G9T1WC4LTM"
+       };
+
+        
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+        } catch (e) {
+            console.error("Firebase initialization failed:", e);
+            document.getElementById('my-tickets').innerHTML = '<p class="text-center text-red-500">Error: Could not connect to the backend.</p>';
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                console.log("User authenticated with ID:", userId);
+                loadTickets();
+            } else {
+                try {
+                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed:", error);
+                }
+            }
+        });
+
+        // --- Ticket Generation Logic ---
+        const ticketForm = document.getElementById('ticket-form');
+        ticketForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!db) {
+                 alert("Backend is not configured. Cannot save ticket.");
+                 return;
+            }
+            const submitButton = document.getElementById('submit-ticket');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Generating...';
+
+            const name = ticketForm.name.value;
+            const from = ticketForm.from.value;
+            const to = ticketForm.to.value;
+
+            try {
+                const docRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/tickets`), {
+                    name,
+                    from,
+                    to,
+                    createdAt: serverTimestamp(),
+                    userId: userId 
+                });
+                console.log("Ticket created with ID: ", docRef.id);
+                showTicketModal({ id: docRef.id, name, from, to, createdAt: new Date() });
+                ticketForm.reset();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert('There was an error creating your ticket.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Generate My Ticket';
+            }
+        });
+        
+        // --- Display Tickets ---
+        function loadTickets() {
+            if (!db) return;
+            const ticketsQuery = query(collection(db, `/artifacts/${appId}/public/data/tickets`), where("userId", "==", userId));
+            
+            onSnapshot(ticketsQuery, (snapshot) => {
+                const ticketHistory = document.getElementById('ticket-history');
+                if (snapshot.empty) {
+                    ticketHistory.innerHTML = '<p class="text-center text-gray-500">You have no tickets yet.</p>';
+                    return;
+                }
+                ticketHistory.innerHTML = ''; // Clear previous tickets
+                snapshot.forEach(doc => {
+                    const ticket = doc.data();
+                    const ticketElement = document.createElement('div');
+                    ticketElement.className = 'bg-white p-4 rounded-lg shadow border flex justify-between items-center';
+                    ticketElement.innerHTML = `
+                        <div>
+                            <p class="font-bold">${ticket.from} <i data-lucide="arrow-right" class="inline-block w-4 h-4"></i> ${ticket.to}</p>
+                            <p class="text-sm text-gray-500">For: ${ticket.name} &bull; Issued: ${ticket.createdAt.toDate().toLocaleDateString()}</p>
+                        </div>
+                        <button class="view-ticket-btn bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md text-sm font-semibold" data-id="${doc.id}">View</button>
+                    `;
+                    ticketHistory.appendChild(ticketElement);
+                });
+                lucide.createIcons(); // Re-render icons
+
+                // Add event listeners to new buttons
+                document.querySelectorAll('.view-ticket-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const ticketId = button.dataset.id;
+                        const ticketData = snapshot.docs.find(d => d.id === ticketId).data();
+                        showTicketModal({id: ticketId, ...ticketData});
+                    });
+                });
+            });
+        }
+        
+        // --- Modal Logic ---
+        const modal = document.getElementById('ticketModal');
+        const qrcodeContainer = document.getElementById('modal-qrcode');
+        let qrcode = new QRCode(qrcodeContainer, { width: 180, height: 180 });
+
+        function showTicketModal(ticket) {
+            document.getElementById('modal-name').textContent = ticket.name;
+            document.getElementById('modal-from').textContent = ticket.from;
+            document.getElementById('modal-to').textContent = ticket.to;
+            const date = ticket.createdAt instanceof Date ? ticket.createdAt : ticket.createdAt.toDate();
+            document.getElementById('modal-date').textContent = date.toLocaleString();
+            document.getElementById('modal-ticket-id').textContent = `ID: ${ticket.id}`;
+            
+            qrcode.makeCode(JSON.stringify({ticketId: ticket.id, from: ticket.from, to: ticket.to}));
+
+            modal.classList.remove('hidden');
+        }
+
+        document.getElementById('close-modal').addEventListener('click', () => modal.classList.add('hidden'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
+
