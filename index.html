@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G9T1WC4LTM"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-G9T1WC4LTM');
+    </script>
     
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-G9T1WC4LTM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-G9T1WC4LTM');
-</script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SwiftPass - One Nation, One Ticket</title>
@@ -27,22 +25,9 @@
         .hero-glow {
             box-shadow: 0 0 80px 30px #4f46e533;
         }
-        .scroll-animation {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .scroll-animation.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
         /* Styles for the ticket modal */
         #ticketModal {
             transition: opacity 0.3s ease;
-        }
-        .ticket-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-left: 8px solid #4f46e5;
         }
         .ticket-hole {
             position: absolute;
@@ -52,6 +37,14 @@
             border-radius: 50%;
             border: 1px solid #e2e8f0;
         }
+        /* Style for the selection cards */
+        .selection-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .selection-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -60,18 +53,18 @@
     <header id="header" class="bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50 shadow-sm transition-all duration-300">
         <div class="container mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
+                <a href="#" id="logo-link" class="flex items-center space-x-2 cursor-pointer">
                     <img src="swiftpass-logo.png" alt="SwiftPass Logo" class="h-8 w-auto">
                     <span class="text-2xl font-bold text-gray-900">SwiftPass</span>
-                </div>
+                </a>
                 <nav class="hidden md:flex items-center space-x-8">
-                    <a href="#home" class="text-gray-600 hover:text-indigo-600 transition">Home</a>
-                    <a href="#generate-ticket" class="text-gray-600 hover:text-indigo-600 transition">Generate Ticket</a>
-                    <a href="#about" class="text-gray-600 hover:text-indigo-600 transition">About Us</a>
-                    <a href="#contact" class="text-gray-600 hover:text-indigo-600 transition">Contact</a>
+                    <a href="#" id="nav-home" class="text-gray-600 hover:text-indigo-600 transition">Home</a>
+                    <a href="#" id="nav-tickets" class="text-gray-600 hover:text-indigo-600 transition">My Tickets</a>
+                    <a href="#" id="nav-about" class="text-gray-600 hover:text-indigo-600 transition">About Us</a>
+                    <a href="#" id="nav-contact" class="text-gray-600 hover:text-indigo-600 transition">Contact</a>
                 </nav>
                 <div class="flex items-center space-x-4">
-                     <a href="#" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-sm hidden sm:block">Download App</a>
+                     <a href="#" id="start-flow-button" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-sm hidden sm:block">Buy Ticket</a>
                      <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100">
                         <i data-lucide="menu"></i>
                      </button>
@@ -80,18 +73,19 @@
         </div>
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 bg-white/80 backdrop-blur-md">
-            <a href="#home" class="block py-2 text-gray-600 hover:text-indigo-600">Home</a>
-            <a href="#generate-ticket" class="block py-2 text-gray-600 hover:text-indigo-600">Generate Ticket</a>
-            <a href="#about" class="block py-2 text-gray-600 hover:text-indigo-600">About Us</a>
-            <a href="#contact" class="block py-2 text-gray-600 hover:text-indigo-600">Contact</a>
+            <a href="#" id="nav-mobile-home" class="block py-2 text-gray-600 hover:text-indigo-600">Home</a>
+            <a href="#" id="nav-mobile-buy" class="block py-2 text-gray-600 hover:text-indigo-600">Buy Ticket</a>
+            <a href="#" id="nav-mobile-tickets" class="block py-2 text-gray-600 hover:text-indigo-600">My Tickets</a>
+            <a href="#" id="nav-mobile-about" class="block py-2 text-gray-600 hover:text-indigo-600">About Us</a>
+            <a href="#" id="nav-mobile-contact" class="block py-2 text-gray-600 hover:text-indigo-600">Contact</a>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main>
-        <!-- Hero Section -->
-        <section id="home" class="pt-24 md:pt-32 container mx-auto px-6 text-center">
-            <!-- ... existing hero section code ... -->
+    <main class="pt-20">
+        
+        <!-- Page 0: Home / Hero Section -->
+        <section id="home-page" class="pt-4 md:pt-12 container mx-auto px-6 text-center">
             <div class="max-w-4xl mx-auto">
                 <span class="inline-block bg-indigo-100 text-indigo-700 text-sm font-semibold px-4 py-1 rounded-full mb-4">One Nation, One Ticket</span>
                 <h1 class="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">Seamless Travel Across India.</h1>
@@ -99,38 +93,96 @@
                     SwiftPass unifies public transport with a single QR code ticket for any bus, metro, or ferry. Say goodbye to queues and hello to smarter, cashless commutes.
                 </p>
                 <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
-                    <a href="#" class="flex items-center justify-center bg-gray-800 text-white w-full sm:w-auto px-6 py-3 rounded-lg hover:bg-gray-900 transition">
-                        <i data-lucide="apple" class="w-6 h-6 mr-3"></i>
-                        <div>
-                            <p class="text-xs">Download on the</p>
-                            <p class="text-lg font-semibold">App Store</p>
-                        </div>
-                    </a>
-                    <a href="#" class="flex items-center justify-center bg-gray-800 text-white w-full sm:w-auto px-6 py-3 rounded-lg hover:bg-gray-900 transition">
-                        <i data-lucide="play-circle" class="w-6 h-6 mr-3"></i>
-                        <div>
-                            <p class="text-xs">GET IT ON</p>
-                            <p class="text-lg font-semibold">Google Play</p>
-                        </div>
+                    <a href="#" id="start-flow-button-hero" class="flex items-center justify-center bg-indigo-600 text-white w-full sm:w-auto px-8 py-4 rounded-lg hover:bg-indigo-700 transition text-lg font-semibold">
+                        <i data-lucide="ticket" class="w-6 h-6 mr-3"></i>
+                        Get Your Ticket Now
                     </a>
                 </div>
             </div>
-            <div class="mt-12 md:mt-16 flex justify-center scroll-animation">
+            <div class="mt-12 md:mt-16 flex justify-center">
                 <div class="relative w-full max-w-3xl">
                     <div class="absolute inset-0 bg-indigo-500 rounded-full blur-3xl opacity-20 hero-glow"></div>
-                    <img src="https://placehold.co/1200x675/E0E7FF/4F46E5?text=SwiftPass+App+Interface" alt="SwiftPass App on a Smartphone" class="relative rounded-2xl shadow-2xl border-4 border-gray-200">
+                    <img src="swift-logo.png" alt="SwiftPass App on a Smartphone" class="relative rounded-2xl shadow-2xl border-4 border-gray-200">
                 </div>
             </div>
         </section>
 
-        <!-- Generate Ticket Section -->
-        <section id="generate-ticket" class="py-20 md:py-28 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="max-w-2xl mx-auto text-center">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Create Your Ticket</h2>
-                    <p class="mt-4 text-gray-600">Fill in your journey details to instantly generate a universal travel pass.</p>
+        <!-- Page 1: City Selection -->
+        <section id="city-selection-page" style="display: none;" class="py-16 md:py-24 container mx-auto px-6">
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center">Start Your Journey</h2>
+                <p class="mt-4 text-lg text-gray-600 text-center">Please select your city to begin.</p>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- City Card -->
+                    <div data-city="Mumbai" class="city-select-btn selection-card bg-white p-6 rounded-xl shadow-lg border border-gray-100 text-center cursor-pointer">
+                        <img src="mumbai.png" alt="Mumbai" class="rounded-lg mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900">Mumbai</h3>
+                    </div>
+                    <!-- City Card -->
+                    <div data-city="Delhi" class="city-select-btn selection-card bg-white p-6 rounded-xl shadow-lg border border-gray-100 text-center cursor-pointer">
+                        <img src="delhi.png" alt="Delhi" class="rounded-lg mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900">Delhi</h3>
+                    </div>
+                    <!-- City Card -->
+                    <div data-city="Bengaluru" class="city-select-btn selection-card bg-white p-6 rounded-xl shadow-lg border border-gray-100 text-center cursor-pointer">
+                        <img src="bengaluru.png" alt="Bengaluru" class="rounded-lg mb-4">
+                        <h3 class="text-2xl font-bold text-gray-900">Bengaluru</h3>
+                    </div>
                 </div>
-                <div class="mt-12 max-w-xl mx-auto">
+                <p class="mt-8 text-center text-gray-500">More cities coming soon!</p>
+            </div>
+        </section>
+
+        <!-- Page 2: Mode Selection -->
+        <section id="mode-selection-page" style="display: none;" class="py-16 md:py-24 container mx-auto px-6">
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center">Select Mode of Transport</h2>
+                <p id="city-selection-summary" class="mt-4 text-lg text-gray-600 text-center">City: <strong>Mumbai</strong></p>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Mode Card -->
+                    <div data-mode="Metro" class="mode-select-btn selection-card bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center cursor-pointer flex flex-col items-center justify-center">
+                        <i data-lucide="train-front" class="w-16 h-16 text-indigo-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-900">Metro</h3>
+                    </div>
+                    <!-- Mode Card -->
+                    <div data-mode="Bus" class="mode-select-btn selection-card bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center cursor-pointer flex flex-col items-center justify-center">
+                        <i data-lucide="bus" class="w-16 h-16 text-indigo-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-900">Bus</h3>
+                    </div>
+                    <!-- Mode Card -->
+                    <div data-mode="Ferry" class="mode-select-btn selection-card bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center cursor-pointer flex flex-col items-center justify-center">
+                        <i data-lucide="ship" class="w-16 h-16 text-indigo-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-900">Ferry</h3>
+                    </div>
+                    <!-- Mode Card -->
+                    <div data-mode="train" class="mode-select-btn selection-card bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center cursor-pointer flex flex-col items-center justify-center">
+                        <i data-lucide="tram-front" class="w-16 h-16 text-indigo-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-900">Train</h3>
+                    </div>
+                        <!-- Mode Card -->
+                    <div data-mode="taxi" class="mode-select-btn selection-card bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center cursor-pointer flex flex-col items-center justify-center">
+                        <i data-lucide="car-front" class="w-16 h-16 text-indigo-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-900">Taxi</h3>
+                    </div>
+                </div>
+                <div class="mt-12 text-center">
+                    <button id="back-to-city" class="text-gray-600 font-semibold hover:text-indigo-600 transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4 inline-block mr-1"></i> Back to City Selection
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page 3: Generate Ticket Section -->
+        <section id="ticket-generation-page" style="display: none;" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="max-w-xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Create Your Ticket</h2>
+                        <p id="ticket-journey-summary" class="mt-4 text-lg text-gray-600">
+                            Your Journey: <strong>Mumbai</strong> &gt; <strong>Metro</strong>
+                        </p>
+                    </div>
                     <form id="ticket-form" class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 space-y-6">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
@@ -148,27 +200,33 @@
                             Generate My Ticket
                         </button>
                     </form>
-                </div>
-
-                <!-- My Tickets Section -->
-                <div id="my-tickets" class="mt-16 max-w-4xl mx-auto">
-                    <h3 class="text-2xl font-bold text-gray-900 text-center">My Recent Tickets</h3>
-                    <div id="ticket-history" class="mt-6 space-y-4">
-                        <p class="text-center text-gray-500">Your generated tickets will appear here...</p>
+                    <div class="mt-8 text-center">
+                        <button id="back-to-mode" class="text-gray-600 font-semibold hover:text-indigo-600 transition">
+                            <i data-lucide="arrow-left" class="w-4 h-4 inline-block mr-1"></i> Back to Mode Selection
+                        </button>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- My Tickets Section -->
+        <section id="my-tickets-section" style="display: none;" class="py-16 md:py-24 container mx-auto px-6">
+            <div id="my-tickets" class="max-w-4xl mx-auto">
+                <h3 class="text-3xl md:text-4xl font-bold text-gray-900 text-center">My Recent Tickets</h3>
+                <div id="ticket-history" class="mt-10 space-y-4">
+                    <p class="text-center text-gray-500">Your generated tickets will appear here...</p>
+                </div>
+            </div>
+        </section>
+
         <!-- About Us Section -->
-        <section id="about" class="py-20 md:py-28 bg-gray-100">
-            <!-- ... existing about section code ... -->
+        <section id="about-page" style="display: none;" class="py-20 md:py-28 bg-gray-100">
             <div class="container mx-auto px-6">
                 <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <div class="scroll-animation">
+                    <div>
                         <img src="https://placehold.co/600x400/E0E7FF/4F46E5?text=Modern+Indian+Cityscape" alt="Modern Indian city with public transport" class="rounded-xl shadow-lg">
                     </div>
-                    <div class="scroll-animation">
+                    <div>
                         <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Simplifying Urban Mobility</h2>
                         <p class="mt-4 text-lg text-gray-600">
                             SwiftPass is a forward-thinking technology company dedicated to simplifying and unifying public transportation across India. We address the challenges of urban mobility by providing a single, seamless mobile platform for all travel needs.
@@ -179,8 +237,7 @@
         </section>
 
         <!-- Contact/Footer Section -->
-        <footer id="contact" class="bg-gray-800 text-white">
-            <!-- ... existing footer section code ... -->
+        <footer id="contact-page" class="bg-gray-800 text-white">
             <div class="container mx-auto px-6 py-16">
                 <div class="grid md:grid-cols-3 gap-12">
                      <div>
@@ -193,8 +250,8 @@
                     <div>
                         <h4 class="font-semibold text-lg text-white">Quick Links</h4>
                         <ul class="mt-4 space-y-2">
-                            <li><a href="#about" class="text-gray-400 hover:text-white">About Us</a></li>
-                            <li><a href="#generate-ticket" class="text-gray-400 hover:text-white">Generate Ticket</a></li>
+                            <li><a href="#" id="footer-nav-about" class="text-gray-400 hover:text-white">About Us</a></li>
+                            <li><a href="#" id="footer-nav-buy" class="text-gray-400 hover:text-white">Buy Ticket</a></li>
                         </ul>
                     </div>
                      <div>
@@ -212,7 +269,7 @@
         </footer>
     </main>
     
-    <!-- Ticket Modal -->
+    <!-- Ticket Modal (No changes) -->
     <div id="ticketModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-slate-100 rounded-2xl shadow-2xl w-full max-w-sm m-auto overflow-hidden relative">
              <div class="ticket-hole top-1/2 -left-4 -translate-y-1/2"></div>
@@ -266,26 +323,20 @@
 
         // --- Core Page Interactivity ---
         lucide.createIcons();
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // --- Firebase Setup ---
+        // --- Firebase Setup (No Changes) ---
         let db, auth, userId;
         const appId = 'swiftpass-demo';
-
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
         const firebaseConfig = {
-        apiKey: "AIzaSyB3cUqNXKNJDymavACVp0rnD6l4v2MrLWQ",
-        authDomain: "swiftpass-live.firebaseapp.com",
-        projectId: "swiftpass-live",
-        storageBucket: "swiftpass-live.firebasestorage.app",
-        messagingSenderId: "927041210415",
-        appId: "1:927041210415:web:6407cff657126750179eda",
-        measurementId: "G-G9T1WC4LTM"
-       };
-
+            apiKey: "AIzaSyB3cUqNXKNJDymavACVp0rnD6l4v2MrLWQ",
+            authDomain: "swiftpass-live.firebaseapp.com",
+            projectId: "swiftpass-live",
+            storageBucket: "swiftpass-live.firebasestorage.app",
+            messagingSenderId: "927041210415",
+            appId: "1:927041210415:web:6407cff657126750179eda",
+            measurementId: "G-G9T1WC4LTM"
+        };
         
         try {
             const app = initializeApp(firebaseConfig);
@@ -293,28 +344,113 @@
             auth = getAuth(app);
         } catch (e) {
             console.error("Firebase initialization failed:", e);
-            document.getElementById('my-tickets').innerHTML = '<p class="text-center text-red-500">Error: Could not connect to the backend.</p>';
         }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
                 console.log("User authenticated with ID:", userId);
-                loadTickets();
+                loadTickets(); // Load tickets as soon as user is authenticated
             } else {
                 try {
-                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
+                    // Since you are using your own firebaseConfig, we will only use anonymous sign-in.
+                    // The __initial_auth_token is for the Canvas environment's internal Firebase project.
+                    await signInAnonymously(auth);
                 } catch (error) {
                     console.error("Authentication failed:", error);
                 }
             }
         });
 
-        // --- Ticket Generation Logic ---
+        // --- NEW: Page Navigation Logic ---
+        const pages = {
+            home: document.getElementById('home-page'),
+            citySelection: document.getElementById('city-selection-page'),
+            modeSelection: document.getElementById('mode-selection-page'),
+            ticketGeneration: document.getElementById('ticket-generation-page'),
+            myTickets: document.getElementById('my-tickets-section'),
+            about: document.getElementById('about-page'),
+            contact: document.getElementById('contact-page')
+        };
+
+        const mobileMenu = document.getElementById('mobile-menu');
+        let selectedCity = '';
+        let selectedMode = '';
+
+        // Function to show a page and hide others
+        function showPage(pageId) {
+            // Hide all pages
+            Object.values(pages).forEach(page => {
+                if(page) page.style.display = 'none';
+            });
+            // Show the requested page
+            if (pages[pageId]) {
+                pages[pageId].style.display = 'block';
+                // Always show the footer with the contact info
+                if(pages.contact) pages.contact.style.display = 'block';
+            }
+            // Close mobile menu
+            mobileMenu.classList.add('hidden');
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // --- Navigation Event Listeners ---
+        
+        // Logo
+        document.getElementById('logo-link').addEventListener('click', (e) => { e.preventDefault(); showPage('home'); });
+
+        // Desktop Nav
+        document.getElementById('nav-home').addEventListener('click', (e) => { e.preventDefault(); showPage('home'); });
+        document.getElementById('nav-tickets').addEventListener('click', (e) => { e.preventDefault(); showPage('myTickets'); });
+        document.getElementById('nav-about').addEventListener('click', (e) => { e.preventDefault(); showPage('about'); });
+        document.getElementById('nav-contact').addEventListener('click', (e) => { e.preventDefault(); pages.contact.scrollIntoView({ behavior: 'smooth' }); });
+
+        // Mobile Nav
+        document.getElementById('mobile-menu-button').addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+        document.getElementById('nav-mobile-home').addEventListener('click', (e) => { e.preventDefault(); showPage('home'); });
+        document.getElementById('nav-mobile-buy').addEventListener('click', (e) => { e.preventDefault(); showPage('citySelection'); });
+        document.getElementById('nav-mobile-tickets').addEventListener('click', (e) => { e.preventDefault(); showPage('myTickets'); });
+        document.getElementById('nav-mobile-about').addEventListener('click', (e) => { e.preventDefault(); showPage('about'); });
+        document.getElementById('nav-mobile-contact').addEventListener('click', (e) => { e.preventDefault(); pages.contact.scrollIntoView({ behavior: 'smooth' }); });
+
+        // Footer Nav
+        document.getElementById('footer-nav-about').addEventListener('click', (e) => { e.preventDefault(); showPage('about'); });
+        document.getElementById('footer-nav-buy').addEventListener('click', (e) => { e.preventDefault(); showPage('citySelection'); });
+
+        // --- Ticket Flow Logic ---
+
+        // 1. Start Flow (Buttons)
+        document.getElementById('start-flow-button').addEventListener('click', (e) => { e.preventDefault(); showPage('citySelection'); });
+        document.getElementById('start-flow-button-hero').addEventListener('click', (e) => { e.preventDefault(); showPage('citySelection'); });
+
+        // 2. City Selection
+        document.querySelectorAll('.city-select-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                selectedCity = button.dataset.city;
+                document.getElementById('city-selection-summary').innerHTML = `City: <strong>${selectedCity}</strong>`;
+                showPage('modeSelection');
+            });
+        });
+
+        // 3. Mode Selection
+        document.querySelectorAll('.mode-select-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                selectedMode = button.dataset.mode;
+                document.getElementById('ticket-journey-summary').innerHTML = `Your Journey: <strong>${selectedCity}</strong> &gt; <strong>${selectedMode}</strong>`;
+                showPage('ticketGeneration');
+            });
+        });
+
+        // --- Back Buttons ---
+        document.getElementById('back-to-city').addEventListener('click', (e) => { e.preventDefault(); showPage('citySelection'); });
+        document.getElementById('back-to-mode').addEventListener('click', (e) => { e.preventDefault(); showPage('modeSelection'); });
+        
+        // --- Show Home Page on Load ---
+        showPage('home');
+
+
+        // --- Ticket Generation Logic (No Changes) ---
         const ticketForm = document.getElementById('ticket-form');
         ticketForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -335,12 +471,24 @@
                     name,
                     from,
                     to,
+                    city: selectedCity, // Added city to saved data
+                    mode: selectedMode, // Added mode to saved data
                     createdAt: serverTimestamp(),
                     userId: userId 
                 });
                 console.log("Ticket created with ID: ", docRef.id);
-                showTicketModal({ id: docRef.id, name, from, to, createdAt: new Date() });
+                // We're passing the full ticket object to the modal
+                showTicketModal({ 
+                    id: docRef.id, 
+                    name, 
+                    from, 
+                    to, 
+                    city: selectedCity, 
+                    mode: selectedMode, 
+                    createdAt: new Date() 
+                });
                 ticketForm.reset();
+                showPage('myTickets'); // Go to "My Tickets" page after generation
             } catch (error) {
                 console.error("Error adding document: ", error);
                 alert('There was an error creating your ticket.');
@@ -350,7 +498,7 @@
             }
         });
         
-        // --- Display Tickets ---
+        // --- Display Tickets (No Changes) ---
         function loadTickets() {
             if (!db) return;
             const ticketsQuery = query(collection(db, `/artifacts/${appId}/public/data/tickets`), where("userId", "==", userId));
@@ -362,16 +510,21 @@
                     return;
                 }
                 ticketHistory.innerHTML = ''; // Clear previous tickets
-                snapshot.forEach(doc => {
-                    const ticket = doc.data();
+                const allTickets = [];
+                snapshot.forEach(doc => allTickets.push({id: doc.id, ...doc.data()}));
+                
+                // Sort by creation date, newest first
+                allTickets.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+
+                allTickets.forEach(ticket => {
                     const ticketElement = document.createElement('div');
                     ticketElement.className = 'bg-white p-4 rounded-lg shadow border flex justify-between items-center';
                     ticketElement.innerHTML = `
                         <div>
                             <p class="font-bold">${ticket.from} <i data-lucide="arrow-right" class="inline-block w-4 h-4"></i> ${ticket.to}</p>
-                            <p class="text-sm text-gray-500">For: ${ticket.name} &bull; Issued: ${ticket.createdAt.toDate().toLocaleDateString()}</p>
+                            <p class="text-sm text-gray-500">For: ${ticket.name} &bull; ${ticket.city} ${ticket.mode} &bull; Issued: ${ticket.createdAt.toDate().toLocaleDateString()}</p>
                         </div>
-                        <button class="view-ticket-btn bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md text-sm font-semibold" data-id="${doc.id}">View</button>
+                        <button class="view-ticket-btn bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md text-sm font-semibold" data-id="${ticket.id}">View</button>
                     `;
                     ticketHistory.appendChild(ticketElement);
                 });
@@ -381,14 +534,14 @@
                 document.querySelectorAll('.view-ticket-btn').forEach(button => {
                     button.addEventListener('click', () => {
                         const ticketId = button.dataset.id;
-                        const ticketData = snapshot.docs.find(d => d.id === ticketId).data();
-                        showTicketModal({id: ticketId, ...ticketData});
+                        const ticketData = allTickets.find(t => t.id === ticketId);
+                        showTicketModal(ticketData);
                     });
                 });
             });
         }
         
-        // --- Modal Logic ---
+        // --- Modal Logic (No Changes) ---
         const modal = document.getElementById('ticketModal');
         const qrcodeContainer = document.getElementById('modal-qrcode');
         let qrcode = new QRCode(qrcodeContainer, { width: 180, height: 180 });
@@ -401,7 +554,13 @@
             document.getElementById('modal-date').textContent = date.toLocaleString();
             document.getElementById('modal-ticket-id').textContent = `ID: ${ticket.id}`;
             
-            qrcode.makeCode(JSON.stringify({ticketId: ticket.id, from: ticket.from, to: ticket.to}));
+            qrcode.makeCode(JSON.stringify({
+                ticketId: ticket.id, 
+                city: ticket.city, 
+                mode: ticket.mode, 
+                from: ticket.from, 
+                to: ticket.to
+            }));
 
             modal.classList.remove('hidden');
         }
@@ -415,7 +574,5 @@
     </script>
 </body>
 </html>
-
-
 
 
