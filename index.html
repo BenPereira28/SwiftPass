@@ -421,38 +421,55 @@
         import { 
             getAuth, 
             signInAnonymously, 
+            // --- FIX: Added signInWithCustomToken ---
+            signInWithCustomToken,
             onAuthStateChanged,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
             signOut
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Core Page Interactivity ---
-        lucide.createIcons();
+        // --- FIX: Wrap initial lucide call in DOMContentLoaded ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+        // --- END FIX ---
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // --- Firebase Setup ---
+        // --- FIXED: Secure Firebase Setup ---
         let db, auth, userId;
-        let isUserLoggedIn = false; // NEW: Flag to track login state
+        let isUserLoggedIn = false; 
         const appId = 'swiftpass-demo'; // This is a local app identifier, not from Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyB3cUqNXKNJDymavACVp0rnD6l4v2MrLWQ",
-            authDomain: "swiftpass-live.firebaseapp.com",
-            projectId: "swiftpass-live",
-            storageBucket: "swiftpass-live.firebasestorage.app",
-            messagingSenderId: "927041210415",
-            appId: "1:927041210415:web:6407cff657126750179eda",
-            measurementId: "G-G9T1WC4LTM"
-        };
+        
+        // This securely loads the config from the environment variables
+        // You must paste your NEW, RESTRICTED API key config into the platform's __firebase_config variable
+        let firebaseConfig;
+        try {
+            if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+                 throw new Error("Firebase config variable is missing.");
+            }
+            firebaseConfig = JSON.parse(__firebase_config);
+        } catch (e) {
+            console.error("Failed to parse Firebase config:", e);
+            document.body.innerHTML = `<div style="text-align: center; padding: 40px; font-family: sans-serif;">
+                <h1>Critical Error</h1>
+                <p>The application's backend configuration is missing or invalid.</p>
+                <p>Please contact support.</p>
+            </div>`;
+        }
         
         try {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
+            setLogLevel('Debug'); // Added for more detailed logging
         } catch (e) {
             console.error("Firebase initialization failed:", e);
         }
+        // --- END: Secure Firebase Setup ---
+
 
         // --- MODIFIED: onAuthStateChanged Logic ---
         onAuthStateChanged(auth, async (user) => {
@@ -497,13 +514,19 @@
             } else {
                 // --- User is LOGGED OUT (null) ---
                 isUserLoggedIn = false; // MODIFIED: Set flag
-                console.log("User is logged out. Signing in anonymously.");
+                console.log("User is logged out. Attempting to sign in...");
                 try {
-                    await signInAnonymously(auth);
-                    // onAuthStateChanged will run again after this,
-                    // and will fall into the (user.isAnonymous) block
+                    // --- FIX: Restored logic to use __initial_auth_token if available ---
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        console.log("Signing in with custom token.");
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        console.log("Signing in anonymously.");
+                        await signInAnonymously(auth);
+                    }
+                    // onAuthStateChanged will run again after this
                 } catch (error) {
-                    console.error("Anonymous sign-in failed:", error);
+                    console.error("Authentication failed:", error);
                 }
             }
         });
@@ -606,7 +629,6 @@
 
 
         // --- Ticket Generation Logic ---
-        // ... (No changes to this section's logic, just a check for userId) ...
         const ticketForm = document.getElementById('ticket-form');
         ticketForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -623,15 +645,16 @@
             const to = ticketForm.to.value;
 
             try {
-                const collectionPath = `/artifacts/${appId}/public/data/tickets`;
+                // --- FIX: Changed to private user-specific path ---
+                const collectionPath = `/artifacts/${appId}/users/${userId}/tickets`;
                 const docRef = await addDoc(collection(db, collectionPath), {
                     name,
                     from,
                     to,
                     city: selectedCity,
                     mode: selectedMode,
-                    createdAt: serverTimestamp(),
-                    userId: userId // This now saves to either the anonymous or logged-in user
+                    createdAt: serverTimestamp()
+                    // --- FIX: Removed userId from document, it's now in the path ---
                 });
                 console.log("Ticket created with ID: ", docRef.id);
                 showTicketModal({ 
@@ -653,7 +676,6 @@
         });
 
         // --- Contact Form Logic ---
-        // ... (No changes to this section's logic, just a check for userId) ...
         const contactForm = document.getElementById('contact-form');
         const successMessage = document.getElementById('form-success-message');
         const submitMessageButton = document.getElementById('submit-message');
@@ -673,13 +695,14 @@
             const message = document.getElementById('contact-message').value;
 
             try {
-                const collectionPath = `/artifacts/${appId}/public/data/messages`;
+                // --- FIX: Changed to private user-specific path ---
+                const collectionPath = `/artifacts/${appId}/users/${userId}/messages`;
                 await addDoc(collection(db, collectionPath), {
                     name: name,
                     email: email,
                     message: message,
-                    sentAt: serverTimestamp(),
-                    userId: userId // Saves the message with the user's ID
+                    sentAt: serverTimestamp()
+                    // --- FIX: Removed userId from document, it's now in the path ---
                 });
                 
                 successMessage.style.display = 'block';
@@ -698,13 +721,19 @@
         });
         
         // --- Display Tickets ---
-        // ... (No changes to this section's logic) ...
         function loadTickets() {
-            if (!db || !userId) return; 
+            if (!db || !userId) {
+                console.log("Cannot load tickets, db or userId is missing.");
+                return; 
+            }
             
-            const collectionPath = `/artifacts/${appId}/public/data/tickets`;
-            const ticketsQuery = query(collection(db, collectionPath), where("userId", "==", userId));
+            // --- FIX: Changed to private user-specific path ---
+            const collectionPath = `/artifacts/${appId}/users/${userId}/tickets`;
+            // --- FIX: Removed 'where' clause, as it's no longer needed and causes the permissions error ---
+            const ticketsQuery = query(collection(db, collectionPath));
             
+            console.log(`Loading tickets from: ${collectionPath}`);
+
             onSnapshot(ticketsQuery, (snapshot) => {
                 const ticketHistory = document.getElementById('ticket-history');
                 if (snapshot.empty) {
@@ -744,8 +773,8 @@
                     });
                 });
             }, (error) => {
-                console.error("Error loading tickets: ", error);
-                document.getElementById('ticket-history').innerHTML = '<p class="text-center text-red-500">Error loading tickets.</p>';
+                console.error("Error loading tickets: ", error); // This is where the error appears
+                document.getElementById('ticket-history').innerHTML = '<p class="text-center text-red-500">Error loading tickets. Check permissions.</p>';
             });
         }
         
@@ -822,6 +851,8 @@
             const password = loginForm.password.value;
             authErrorMessage.textContent = '';
             document.getElementById('login-button').disabled = true;
+
+            // --- FIX: Removed the stray 'Empty snippet' line ---
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 // onAuthStateChanged will handle the rest
