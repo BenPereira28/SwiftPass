@@ -884,23 +884,27 @@
         const modal = document.getElementById('ticketModal');
         const qrcodeContainer = document.getElementById('modal-qrcode');
         let qrcode = null; 
-        if (qrcodeContainer) {
-            try {
-                 // Ensure QRCode library is loaded
-                 if (typeof QRCode !== 'undefined') {
-                    qrcode = new QRCode(qrcodeContainer, { width: 180, height: 180 });
-                    console.log("QRCode initialized"); // Log success
-                 } else {
-                     console.error("QRCode library definition not found.");
-                     qrcodeContainer.innerHTML = '<p class="text-red-500">QR Code library not loaded.</p>';
-                 }
-            } catch(e) {
-                console.error("Failed to initialize QRCode:", e);
-                qrcodeContainer.innerHTML = '<p class="text-red-500">QR Code init failed.</p>';
+        
+        // --- FIX: Moved QR Code initialization to DOMContentLoaded ---
+        document.addEventListener('DOMContentLoaded', () => {
+             if (qrcodeContainer) {
+                try {
+                     // Ensure QRCode library is loaded
+                     if (typeof QRCode !== 'undefined') {
+                        qrcode = new QRCode(qrcodeContainer, { width: 180, height: 180 });
+                        console.log("QRCode initialized"); // Log success
+                     } else {
+                         console.error("QRCode library definition not found.");
+                         qrcodeContainer.innerHTML = '<p class="text-red-500">QR Code library not loaded.</p>';
+                     }
+                } catch(e) {
+                    console.error("Failed to initialize QRCode:", e);
+                    qrcodeContainer.innerHTML = '<p class="text-red-500">QR Code init failed.</p>';
+                }
+            } else {
+                 console.error("QR Code container element ('modal-qrcode') not found in HTML.");
             }
-        } else {
-             console.error("QR Code container element ('modal-qrcode') not found in HTML.");
-        }
+        });
 
 
         function showTicketModal(ticket) {
