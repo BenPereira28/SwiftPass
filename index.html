@@ -15,7 +15,8 @@
     <title>SwiftPass - One Nation, One Ticket</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@0.546.0"></script>
+    <!-- Pinning Lucide version to avoid breaking changes -->
+    <script src="https://unpkg.com/lucide@0.546.0"></script> 
     <!-- QR Code Generation Library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
@@ -252,7 +253,6 @@
 
         <!-- Contact Form Page -->
         <section id="contact-form-page" style="display: none;" class="py-16 md:py-24 bg-white">
-            <!-- ... (Existing Contact Form code) ... -->
             <div class="container mx-auto px-6">
                 <div class="max-w-xl mx-auto">
                     <div class="text-center mb-8">
@@ -288,15 +288,11 @@
         <!-- MODIFIED: Login/Signup Page -->
         <section id="login-page" style="display: none;" class="py-16 md:py-24 bg-white">
             <div class="container mx-auto px-6">
-                <!-- MODIFIED: Changed max-w-md to max-w-4xl and added grid classes -->
                 <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 md:gap-12 items-start">
                     
-                    <!-- Auth Error Message -->
-                    <!-- MODIFIED: Added col-span-2 to make it span both columns -->
                     <p id="auth-error-message" class="text-center text-red-600 font-semibold mb-4 md:col-span-2"></p>
 
                     <!-- Sign Up Form -->
-                    <!-- MODIFIED: Removed mb-12 -->
                     <form id="signup-form" class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 space-y-6">
                         <h2 class="text-3xl font-bold text-gray-900 text-center">Create Account</h2>
                         <div>
@@ -335,7 +331,6 @@
 
         <!-- Footer Section -->
         <footer id="footer-section" class="bg-gray-800 text-white">
-            <!-- ... (Existing Footer code) ... -->
             <div class="container mx-auto px-6 py-16">
                 <div class="grid md:grid-cols-3 gap-12">
                      <div>
@@ -378,7 +373,7 @@
             <div class="p-6">
                 <div class="text-center">
                      <div class="flex items-center justify-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M12 22c-4 0-6.5-2-7-5l-1-3.5a1 1 0 0 1 1-1.5h14a1 1 0 0 1 1 1.5l-1 3.5c-.5 3-3 5-7 5Z"/><path d="M2 12h20"/><path d="m19 12-2-8-4-2-4 2-2 8"/><path d="M12 12v10"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M12 22c-4 0-6.5-2-7-5l-1-3.5a1 1 0 0 1 1-1.5h14a1 1 0 0 1 1 1.5l-1 3.5c-.5 3-3 5-7 5Z"/><path d="M2 12h20"/><path d="m19 12-2-8-4-2-4 2-2 8"/><path d="M12 12v10"/></svg>
                         <span class="text-2xl font-bold text-gray-900">SwiftPass</span>
                     </div>
                     <p class="text-sm text-gray-500 mt-1">Universal Travel Pass</p>
@@ -416,7 +411,7 @@
 
 
      <script type="module">
-        // --- MODIFIED: Firebase Imports ---
+        // --- Firebase Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
             getAuth, 
@@ -426,11 +421,49 @@
             signInWithEmailAndPassword,
             signOut
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Core Page Interactivity ---
-        lucide.createIcons();
-        document.getElementById('year').textContent = new Date().getFullYear();
+        // --- FIX: Ensure Lucide is called only when ready ---
+        function initializeLucide() {
+             // Use requestAnimationFrame for better timing relative to rendering
+             requestAnimationFrame(() => {
+                if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+                    try {
+                        console.log("Initializing Lucide icons");
+                        lucide.createIcons();
+                    } catch(e) {
+                        console.error("Lucide error during initial createIcons:", e);
+                    }
+                } else {
+                    console.error("Lucide library or createIcons not ready.");
+                }
+            });
+        }
+        
+        // --- FIX: Function to safely update icons later ---
+        function updateLucideIcons() {
+             requestAnimationFrame(() => { 
+                if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+                    try {
+                        // console.log("Updating Lucide icons"); // Optional debugging
+                        lucide.createIcons();
+                    } catch(e) {
+                        console.error("Lucide error during update createIcons:", e);
+                    }
+                } else {
+                     console.error("Lucide library not available for update.");
+                }
+            });
+        }
+
+        // --- FIX: Call initial Lucide setup after DOM is loaded ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLucide();
+            const yearEl = document.getElementById('year');
+            if (yearEl) yearEl.textContent = new Date().getFullYear();
+        });
+
 
         // --- Firebase Setup ---
         let db, auth, userId;
@@ -446,67 +479,103 @@
             measurementId: "G-G9T1WC4LTM"
         };
         
+        let firebaseAppInitialized = false; // Flag to check init status
+
         try {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
+            setLogLevel('Debug'); // Enable debug logging for Firebase
+            firebaseAppInitialized = true; // Set flag
+            console.log("Firebase initialized successfully."); // Log success
         } catch (e) {
             console.error("Firebase initialization failed:", e);
+             document.body.innerHTML = `<div style="text-align: center; padding: 40px; font-family: sans-serif;"><h1>Initialization Error</h1><p>Could not connect to the backend services. Please check the configuration or try again later.</p><p style="color: grey; font-size: small;">Error: ${e.message}</p></div>`;
         }
 
         // --- MODIFIED: onAuthStateChanged Logic ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user && !user.isAnonymous) {
-                // --- User is LOGGED IN ---
-                userId = user.uid;
-                isUserLoggedIn = true; // MODIFIED: Set flag
-                console.log("Logged in user:", userId, user.email);
+        // Add check for auth object before adding listener
+        if (auth) {
+            onAuthStateChanged(auth, async (user) => {
+                if (user && !user.isAnonymous) {
+                    // --- User is LOGGED IN ---
+                    userId = user.uid;
+                    isUserLoggedIn = true; // MODIFIED: Set flag
+                    console.log("Logged in user:", userId, user.email);
 
-                // Update UI for logged-in user
-                document.getElementById('user-email').textContent = user.email;
-                document.getElementById('user-email').style.display = 'block';
-                document.getElementById('nav-logout').style.display = 'block';
-                document.getElementById('nav-login').style.display = 'none';
+                    // Update UI for logged-in user
+                     const userEmailEl = document.getElementById('user-email');
+                     const navLogoutEl = document.getElementById('nav-logout');
+                     const navLoginEl = document.getElementById('nav-login');
+                     if(userEmailEl) userEmailEl.textContent = user.email;
+                     if(userEmailEl) userEmailEl.style.display = 'block';
+                     if(navLogoutEl) navLogoutEl.style.display = 'block';
+                     if(navLoginEl) navLoginEl.style.display = 'none';
 
-                // Mobile UI
-                document.getElementById('mobile-user-email').textContent = user.email;
-                document.getElementById('mobile-user-email').style.display = 'block';
-                document.getElementById('nav-mobile-logout').style.display = 'block';
-                document.getElementById('nav-mobile-login').style.display = 'none';
+                    // Mobile UI
+                    const mobileUserEmailEl = document.getElementById('mobile-user-email');
+                    const mobileNavLogoutEl = document.getElementById('nav-mobile-logout');
+                    const mobileNavLoginEl = document.getElementById('nav-mobile-login');
+                    if(mobileUserEmailEl) mobileUserEmailEl.textContent = user.email;
+                    if(mobileUserEmailEl) mobileUserEmailEl.style.display = 'block';
+                    if(mobileNavLogoutEl) mobileNavLogoutEl.style.display = 'block';
+                    if(mobileNavLoginEl) mobileNavLoginEl.style.display = 'none';
 
-                loadTickets(); // Load their saved tickets
-                
-            } else if (user && user.isAnonymous) {
-                // --- User is ANONYMOUS ---
-                userId = user.uid;
-                isUserLoggedIn = false; // MODIFIED: Set flag
-                console.log("Anonymous user:", userId);
+                    loadTickets(); // Load their saved tickets
+                    
+                } else if (user && user.isAnonymous) {
+                    // --- User is ANONYMOUS ---
+                    userId = user.uid;
+                    isUserLoggedIn = false; // MODIFIED: Set flag
+                    console.log("Anonymous user:", userId);
 
-                // Update UI for anonymous user
-                document.getElementById('user-email').style.display = 'none';
-                document.getElementById('nav-logout').style.display = 'none';
-                document.getElementById('nav-login').style.display = 'block';
+                    // Update UI for anonymous user
+                    const userEmailEl = document.getElementById('user-email');
+                    const navLogoutEl = document.getElementById('nav-logout');
+                    const navLoginEl = document.getElementById('nav-login');
+                    if(userEmailEl) userEmailEl.style.display = 'none';
+                    if(navLogoutEl) navLogoutEl.style.display = 'none';
+                    if(navLoginEl) navLoginEl.style.display = 'block';
 
-                // Mobile UI
-                document.getElementById('mobile-user-email').style.display = 'none';
-                document.getElementById('nav-mobile-logout').style.display = 'none';
-                document.getElementById('nav-mobile-login').style.display = 'block';
+                    // Mobile UI
+                    const mobileUserEmailEl = document.getElementById('mobile-user-email');
+                    const mobileNavLogoutEl = document.getElementById('nav-mobile-logout');
+                    const mobileNavLoginEl = document.getElementById('nav-mobile-login');
+                     if(mobileUserEmailEl) mobileUserEmailEl.style.display = 'none';
+                    if(mobileNavLogoutEl) mobileNavLogoutEl.style.display = 'none';
+                    if(mobileNavLoginEl) mobileNavLoginEl.style.display = 'block';
 
-                loadTickets(); // Load their anonymous tickets
-            
-            } else {
-                // --- User is LOGGED OUT (null) ---
-                isUserLoggedIn = false; // MODIFIED: Set flag
-                console.log("User is logged out. Signing in anonymously.");
-                try {
-                    await signInAnonymously(auth);
-                    // onAuthStateChanged will run again after this,
-                    // and will fall into the (user.isAnonymous) block
-                } catch (error) {
-                    console.error("Anonymous sign-in failed:", error);
+                    loadTickets(); // Load their anonymous tickets
+                    
+                } else {
+                    // --- User is LOGGED OUT (null) ---
+                    isUserLoggedIn = false; // MODIFIED: Set flag
+                    console.log("User is logged out. Signing in anonymously.");
+                    try {
+                        await signInAnonymously(auth);
+                        // onAuthStateChanged will run again after this,
+                        // and will fall into the (user.isAnonymous) block
+                    } catch (error) {
+                        console.error("Anonymous sign-in failed:", error);
+                         // Show error in the auth error message area if it exists
+                        const authErrorElement = document.getElementById('auth-error-message');
+                        if (authErrorElement) {
+                             authErrorElement.textContent = `Could not connect securely: ${error.message}`;
+                        } else {
+                             // Fallback if login page isn't visible
+                             console.error(`Could not connect securely: ${error.message}`);
+                        }
+                    }
                 }
-            }
-        });
+            });
+        } else {
+             console.error("Firebase Auth object is not available. Authentication cannot proceed.");
+             // Show error message or disable auth features
+             const authErrorElement = document.getElementById('auth-error-message');
+             if (authErrorElement) {
+                 authErrorElement.textContent = "Authentication service failed to load.";
+             }
+        }
         // --- END: onAuthStateChanged ---
 
 
@@ -520,7 +589,7 @@
             about: document.getElementById('about-page'),
             contactForm: document.getElementById('contact-form-page'),
             login: document.getElementById('login-page'), // NEW login page
-            contact: document.getElementById('footer-section')
+            contact: document.getElementById('footer-section') // Assuming footer is always visible or handled differently
         };
 
         const mobileMenu = document.getElementById('mobile-menu');
@@ -529,21 +598,37 @@
 
         // Function to show a page and hide others
         function showPage(pageId) {
-            // Hide all pages
-            Object.values(pages).forEach(page => {
-                if(page) page.style.display = 'none';
+            console.log("Showing page:", pageId); // Debugging
+            // Hide all pages defined in the 'pages' object
+            Object.keys(pages).forEach(key => {
+                 // Check if the element exists before trying to hide it
+                 if (pages[key] && key !== 'contact') { // Don't hide footer if it's listed
+                    pages[key].style.display = 'none';
+                 }
             });
-            // Show the requested page
+
+            // Show the requested page if it exists
             if (pages[pageId]) {
                 pages[pageId].style.display = 'block';
+            } else {
+                console.warn("Page ID not found:", pageId); // Warn if page doesn't exist
+                if (pages.home) pages.home.style.display = 'block'; // Fallback to home if it exists
             }
-            // Always show the footer
-            if(pages.contact) pages.contact.style.display = 'block';
+
+            // Ensure footer is always visible (or adjust logic if it should hide sometimes)
+            if(pages.contact) {
+                pages.contact.style.display = 'block';
+            }
             
-            // Close mobile menu
-            mobileMenu.classList.add('hidden');
+            // Close mobile menu if it exists
+            if (mobileMenu) {
+                mobileMenu.classList.add('hidden');
+            }
             // Scroll to top
             window.scrollTo(0, 0);
+
+            // --- FIX: Update icons when page changes ---
+            updateLucideIcons();
         }
 
         // NEW: Function to check login status before starting ticket flow
@@ -556,149 +641,164 @@
         }
 
         // --- Navigation Event Listeners ---
+        // Ensure elements exist before adding listeners
         
-        document.getElementById('logo-link').addEventListener('click', (e) => { e.preventDefault(); showPage('home'); });
+        document.getElementById('logo-link')?.addEventListener('click', (e) => { e.preventDefault(); showPage('home'); });
 
         // Desktop Nav
-        document.getElementById('nav-home').addEventListener('click', (e) => { e.preventDefault(); showPage('home'); });
-        document.getElementById('nav-tickets').addEventListener('click', (e) => { e.preventDefault(); showPage('myTickets'); });
-        document.getElementById('nav-about').addEventListener('click', (e) => { e.preventDefault(); showPage('about'); });
-        document.getElementById('nav-contact').addEventListener('click', (e) => { e.preventDefault(); showPage('contactForm'); });
-        document.getElementById('nav-login').addEventListener('click', (e) => { e.preventDefault(); showPage('login'); }); // NEW
+        document.getElementById('nav-home')?.addEventListener('click', (e) => { e.preventDefault(); showPage('home'); });
+        document.getElementById('nav-tickets')?.addEventListener('click', (e) => { e.preventDefault(); showPage('myTickets'); });
+        document.getElementById('nav-about')?.addEventListener('click', (e) => { e.preventDefault(); showPage('about'); });
+        document.getElementById('nav-contact')?.addEventListener('click', (e) => { e.preventDefault(); showPage('contactForm'); });
+        document.getElementById('nav-login')?.addEventListener('click', (e) => { e.preventDefault(); showPage('login'); }); // NEW
 
         // Mobile Nav
-        document.getElementById('mobile-menu-button').addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
-        document.getElementById('nav-mobile-home').addEventListener('click', (e) => { e.preventDefault(); showPage('home'); });
-        document.getElementById('nav-mobile-buy').addEventListener('click', (e) => { e.preventDefault(); startTicketFlow(); }); // MODIFIED
-        document.getElementById('nav-mobile-tickets').addEventListener('click', (e) => { e.preventDefault(); showPage('myTickets'); });
-        document.getElementById('nav-mobile-about').addEventListener('click', (e) => { e.preventDefault(); showPage('about'); });
-        document.getElementById('nav-mobile-contact').addEventListener('click', (e) => { e.preventDefault(); showPage('contactForm'); });
-        document.getElementById('nav-mobile-login').addEventListener('click', (e) => { e.preventDefault(); showPage('login'); }); // NEW
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        if (mobileMenuButton) { // Check if button exists
+            mobileMenuButton.addEventListener('click', () => mobileMenu?.classList.toggle('hidden'));
+        }
+        document.getElementById('nav-mobile-home')?.addEventListener('click', (e) => { e.preventDefault(); showPage('home'); });
+        document.getElementById('nav-mobile-buy')?.addEventListener('click', (e) => { e.preventDefault(); startTicketFlow(); }); // MODIFIED
+        document.getElementById('nav-mobile-tickets')?.addEventListener('click', (e) => { e.preventDefault(); showPage('myTickets'); });
+        document.getElementById('nav-mobile-about')?.addEventListener('click', (e) => { e.preventDefault(); showPage('about'); });
+        document.getElementById('nav-mobile-contact')?.addEventListener('click', (e) => { e.preventDefault(); showPage('contactForm'); });
+        document.getElementById('nav-mobile-login')?.addEventListener('click', (e) => { e.preventDefault(); showPage('login'); }); // NEW
 
         // Footer Nav
-        document.getElementById('footer-nav-about').addEventListener('click', (e) => { e.preventDefault(); showPage('about'); });
-        document.getElementById('footer-nav-buy').addEventListener('click', (e) => { e.preventDefault(); startTicketFlow(); }); // MODIFIED
-        document.getElementById('footer-nav-contact').addEventListener('click', (e) => { e.preventDefault(); showPage('contactForm'); });
+        document.getElementById('footer-nav-about')?.addEventListener('click', (e) => { e.preventDefault(); showPage('about'); });
+        document.getElementById('footer-nav-buy')?.addEventListener('click', (e) => { e.preventDefault(); startTicketFlow(); }); // MODIFIED
+        document.getElementById('footer-nav-contact')?.addEventListener('click', (e) => { e.preventDefault(); showPage('contactForm'); });
 
         // --- Ticket Flow Logic ---
-        document.getElementById('start-flow-button').addEventListener('click', (e) => { e.preventDefault(); startTicketFlow(); }); // MODIFIED
-        document.getElementById('start-flow-button-hero').addEventListener('click', (e) => { e.preventDefault(); startTicketFlow(); }); // MODIFIED
+        document.getElementById('start-flow-button')?.addEventListener('click', (e) => { e.preventDefault(); startTicketFlow(); }); // MODIFIED
+        document.getElementById('start-flow-button-hero')?.addEventListener('click', (e) => { e.preventDefault(); startTicketFlow(); }); // MODIFIED
         
         document.querySelectorAll('.city-select-btn').forEach(button => {
             button.addEventListener('click', () => {
                 selectedCity = button.dataset.city;
-                document.getElementById('city-selection-summary').innerHTML = `City: <strong>${selectedCity}</strong>`;
+                const summaryEl = document.getElementById('city-selection-summary');
+                if (summaryEl) summaryEl.innerHTML = `City: <strong>${selectedCity}</strong>`;
                 showPage('modeSelection');
             });
         });
         document.querySelectorAll('.mode-select-btn').forEach(button => {
             button.addEventListener('click', () => {
                 selectedMode = button.dataset.mode;
-                document.getElementById('ticket-journey-summary').innerHTML = `Your Journey: <strong>${selectedCity}</strong> &gt; <strong>${selectedMode}</strong>`;
+                 const summaryEl = document.getElementById('ticket-journey-summary');
+                 if (summaryEl) summaryEl.innerHTML = `Your Journey: <strong>${selectedCity}</strong> &gt; <strong>${selectedMode}</strong>`;
                 showPage('ticketGeneration');
             });
         });
-        document.getElementById('back-to-city').addEventListener('click', (e) => { e.preventDefault(); showPage('citySelection'); });
-        document.getElementById('back-to-mode').addEventListener('click', (e) => { e.preventDefault(); showPage('modeSelection'); });
+        document.getElementById('back-to-city')?.addEventListener('click', (e) => { e.preventDefault(); showPage('citySelection'); });
+        document.getElementById('back-to-mode')?.addEventListener('click', (e) => { e.preventDefault(); showPage('modeSelection'); });
         
         // --- Show Home Page on Load ---
         showPage('home');
 
 
         // --- Ticket Generation Logic ---
-        // ... (No changes to this section's logic, just a check for userId) ...
         const ticketForm = document.getElementById('ticket-form');
-        ticketForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!db || !userId) { // Check for userId
-                 alert("Backend is not connected. Please wait and try again.");
-                 return;
-            }
-            const submitButton = document.getElementById('submit-ticket');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Generating...';
+        if (ticketForm) {
+            ticketForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!firebaseAppInitialized || !db || !userId) { 
+                     alert("Backend is not connected. Please wait and try again.");
+                     return;
+                }
+                const submitButton = document.getElementById('submit-ticket');
+                if (!submitButton) return; // Check button exists
+                submitButton.disabled = true;
+                submitButton.textContent = 'Generating...';
 
-            const name = ticketForm.name.value;
-            const from = ticketForm.from.value;
-            const to = ticketForm.to.value;
+                const nameInput = document.getElementById('name');
+                const fromInput = document.getElementById('from');
+                const toInput = document.getElementById('to');
+                // Use empty string as default if inputs not found (shouldn't happen with required)
+                const name = nameInput ? nameInput.value : ''; 
+                const from = fromInput ? fromInput.value : '';
+                const to = toInput ? toInput.value : '';
 
-            try {
-                const collectionPath = `/artifacts/${appId}/public/data/tickets`;
-                const docRef = await addDoc(collection(db, collectionPath), {
-                    name,
-                    from,
-                    to,
-                    city: selectedCity,
-                    mode: selectedMode,
-                    createdAt: serverTimestamp(),
-                    userId: userId // This now saves to either the anonymous or logged-in user
-                });
-                console.log("Ticket created with ID: ", docRef.id);
-                showTicketModal({ 
-                    id: docRef.id, 
-                    name, from, to, 
-                    city: selectedCity, 
-                    mode: selectedMode, 
-                    createdAt: new Date() 
-                });
-                ticketForm.reset();
-                showPage('myTickets');
-            } catch (error) {
-                console.error("Error adding document: ", error);
-                alert('There was an error creating your ticket.');
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Generate My Ticket';
-            }
-        });
+                try {
+                    // --- PATH FIX: Must match security rules ---
+                    const collectionPath = `/artifacts/${appId}/public/data/userTickets/${userId}/tickets`; 
+                    console.log(`Writing ticket to: ${collectionPath} for user: ${userId}`); // Log details
+                    const docRef = await addDoc(collection(db, collectionPath), {
+                        name, 
+                        from, 
+                        to, 
+                        city: selectedCity, 
+                        mode: selectedMode, 
+                        createdAt: serverTimestamp()
+                        // No userId needed IN the document, it's in the path
+                    });
+                    console.log("Ticket created with ID: ", docRef.id);
+                    showTicketModal({ id: docRef.id, name, from, to, city: selectedCity, mode: selectedMode, createdAt: new Date() });
+                    ticketForm.reset();
+                    showPage('myTickets');
+                } catch (error) {
+                    console.error("Error adding document: ", error);
+                     alert(`There was an error creating your ticket: ${error.message}`); // Show more specific error
+                } finally {
+                    if (submitButton) { // Check again before accessing
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Generate My Ticket';
+                    }
+                }
+            });
+        } else {
+             console.error("Ticket form ('ticket-form') not found.");
+        }
 
         // --- Contact Form Logic ---
-        // ... (No changes to this section's logic, just a check for userId) ...
         const contactForm = document.getElementById('contact-form');
         const successMessage = document.getElementById('form-success-message');
         const submitMessageButton = document.getElementById('submit-message');
+        if (contactForm && successMessage && submitMessageButton) {
+            contactForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!firebaseAppInitialized || !db || !userId) { 
+                     alert("Backend is not connected. Please wait and try again.");
+                     return;
+                }
 
-        contactForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!db || !userId) { // Check for userId
-                 alert("Backend is not connected. Please wait and try again.");
-                 return;
-            }
+                submitMessageButton.disabled = true;
+                submitMessageButton.textContent = 'Sending...';
 
-            submitMessageButton.disabled = true;
-            submitMessageButton.textContent = 'Sending...';
+                const nameInput = document.getElementById('contact-name');
+                const emailInput = document.getElementById('contact-email');
+                const messageInput = document.getElementById('contact-message');
+                // Use empty string as default if inputs not found
+                const name = nameInput ? nameInput.value : ''; 
+                const email = emailInput ? emailInput.value : '';
+                const message = messageInput ? messageInput.value : '';
 
-            const name = document.getElementById('contact-name').value;
-            const email = document.getElementById('contact-email').value;
-            const message = document.getElementById('contact-message').value;
-
-            try {
-                const collectionPath = `/artifacts/${appId}/public/data/messages`;
-                await addDoc(collection(db, collectionPath), {
-                    name: name,
-                    email: email,
-                    message: message,
-                    sentAt: serverTimestamp(),
-                    userId: userId // Saves the message with the user's ID
-                });
-                
-                successMessage.style.display = 'block';
-                contactForm.reset();
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                }, 5000);
-
-            } catch (error) {
-                console.error("Error sending message: ", error);
-                alert('Sorry, there was an error sending your message.');
-            } finally {
-                submitMessageButton.disabled = false;
-                submitMessageButton.textContent = 'Send Message';
-            }
-        });
+                try {
+                    // --- PATH FIX: Must match security rules ---
+                    const collectionPath = `/artifacts/${appId}/public/data/userMessages/${userId}/messages`;
+                     console.log(`Writing message to: ${collectionPath} for user: ${userId}`); // Log details
+                    await addDoc(collection(db, collectionPath), { 
+                        name: name, 
+                        email: email, 
+                        message: message, 
+                        sentAt: serverTimestamp() 
+                        // No userId needed IN the document, it's in the path
+                    });
+                    successMessage.style.display = 'block';
+                    contactForm.reset();
+                    setTimeout(() => { successMessage.style.display = 'none'; }, 5000);
+                } catch (error) {
+                    console.error("Error sending message: ", error);
+                     alert(`Sorry, there was an error sending your message: ${error.message}`); // Show specific error
+                } finally {
+                    submitMessageButton.disabled = false;
+                    submitMessageButton.textContent = 'Send Message';
+                }
+            });
+        } else {
+            console.error("Contact form elements not found.");
+        }
         
         // --- Display Tickets ---
-        // ... (No changes to this section's logic) ...
         function loadTickets() {
             if (!firebaseAppInitialized || !db || !userId) {
                  const ticketHistory = document.getElementById('ticket-history');
@@ -783,103 +883,168 @@
         // --- Modal Logic ---
         const modal = document.getElementById('ticketModal');
         const qrcodeContainer = document.getElementById('modal-qrcode');
-        let qrcode = new QRCode(qrcodeContainer, { width: 180, height: 180 });
-
-        function showTicketModal(ticket) {
-            document.getElementById('modal-name').textContent = ticket.name;
-            document.getElementById('modal-from').textContent = ticket.from;
-            document.getElementById('modal-to').textContent = ticket.to;
-            const date = ticket.createdAt instanceof Date ? ticket.createdAt : (ticket.createdAt ? ticket.createdAt.toDate() : new Date());
-            document.getElementById('modal-date').textContent = date.toLocaleString();
-            document.getElementById('modal-ticket-id').textContent = `ID: ${ticket.id}`;
-            
-            qrcode.makeCode(JSON.stringify({
-                ticketId: ticket.id, 
-                city: ticket.city, 
-                mode: ticket.mode, 
-                from: ticket.from, 
-                to: ticket.to
-            }));
-
-            // --- THIS IS THE FIX ---
-            // Changed .add('hidden') to .remove('hidden')
-            modal.classList.remove('hidden');
-            // --- END OF FIX ---
+        let qrcode = null; 
+        if (qrcodeContainer) {
+            try {
+                 // Ensure QRCode library is loaded
+                 if (typeof QRCode !== 'undefined') {
+                    qrcode = new QRCode(qrcodeContainer, { width: 180, height: 180 });
+                    console.log("QRCode initialized"); // Log success
+                 } else {
+                     console.error("QRCode library definition not found.");
+                     qrcodeContainer.innerHTML = '<p class="text-red-500">QR Code library not loaded.</p>';
+                 }
+            } catch(e) {
+                console.error("Failed to initialize QRCode:", e);
+                qrcodeContainer.innerHTML = '<p class="text-red-500">QR Code init failed.</p>';
+            }
+        } else {
+             console.error("QR Code container element ('modal-qrcode') not found in HTML.");
         }
 
-        document.getElementById('close-modal').addEventListener('click', () => modal.classList.add('hidden'));
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
+
+        function showTicketModal(ticket) {
+            if (!modal) { console.error("Modal element not found"); return; }
+             // Check required elements exist
+             const modalNameEl = document.getElementById('modal-name');
+             const modalFromEl = document.getElementById('modal-from');
+             const modalToEl = document.getElementById('modal-to');
+             const modalDateEl = document.getElementById('modal-date');
+             const modalTicketIdEl = document.getElementById('modal-ticket-id');
+             if (!modalNameEl || !modalFromEl || !modalToEl || !modalDateEl || !modalTicketIdEl) {
+                 console.error("One or more modal elements not found.");
+                 return;
+             }
+             
+            if (!qrcode) { 
+                console.error("QRCode object not initialized. Cannot show QR code.");
+                if (qrcodeContainer) qrcodeContainer.innerHTML = '<p class="text-red-500">QR Code cannot be shown.</p>';
+                 // Still show the rest of the modal, just without QR
             }
-        });
+             // Populate modal fields (use fallbacks)
+            modalNameEl.textContent = ticket.name || 'N/A';
+            modalFromEl.textContent = ticket.from || 'N/A';
+            modalToEl.textContent = ticket.to || 'N/A';
+            const date = ticket.createdAt instanceof Date ? ticket.createdAt : (ticket.createdAt?.toDate ? ticket.createdAt.toDate() : new Date()); // Safer date conversion
+            modalDateEl.textContent = date.toLocaleString();
+            modalTicketIdEl.textContent = `ID: ${ticket.id}`;
+            
+            // Generate QR code only if qrcode exists
+            if (qrcode) {
+                try {
+                     // Clear previous QR before making new one
+                     if (qrcodeContainer) qrcodeContainer.innerHTML = ''; 
+                     qrcode.makeCode(JSON.stringify({
+                        ticketId: ticket.id, 
+                        city: ticket.city || 'N/A', 
+                        mode: ticket.mode || 'N/A', 
+                        from: ticket.from || 'N/A', 
+                        to: ticket.to || 'N/A'
+                    }));
+                    console.log("QR Code generated for ticket:", ticket.id); // Log success
+                 } catch(e) {
+                     console.error("Error generating QR code:", e);
+                     if (qrcodeContainer) qrcodeContainer.innerHTML = '<p class="text-red-500">Error generating QR code.</p>'; 
+                 }
+            } 
+
+            modal.classList.remove('hidden'); // Show the modal
+
+            // --- FIX: Update icons within the modal ---
+             updateLucideIcons();
+        }
+
+        const closeModalButton = document.getElementById('close-modal');
+        if (closeModalButton && modal) {
+            closeModalButton.addEventListener('click', () => modal.classList.add('hidden'));
+        }
+        if (modal) {
+             modal.addEventListener('click', (e) => { 
+                if (e.target === modal) { // Only close if clicking the background overlay
+                    modal.classList.add('hidden'); 
+                }
+            });
+        }
 
         // --- NEW: Login/Signup/Logout Event Listeners ---
         const signupForm = document.getElementById('signup-form');
         const loginForm = document.getElementById('login-form');
         const authErrorMessage = document.getElementById('auth-error-message');
 
-        // Sign Up
-        signupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = signupForm.email.value;
-            const password = signupForm.password.value;
-            authErrorMessage.textContent = '';
-            
-            // --- FIX: Add client-side validation ---
-            if (password.length < 6) {
-                authErrorMessage.textContent = "Password should be at least 6 characters.";
-                return; // Stop the function
-            }
-            // --- END FIX ---
+        // Add listeners only if forms exist and auth is initialized
+        if (signupForm && auth) {
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const emailInput = document.getElementById('signup-email');
+                const passwordInput = document.getElementById('signup-password');
+                const email = emailInput ? emailInput.value : '';
+                const password = passwordInput ? passwordInput.value : '';
+                
+                if (authErrorMessage) authErrorMessage.textContent = '';
+                
+                if (password.length < 6) {
+                     if (authErrorMessage) authErrorMessage.textContent = "Password should be at least 6 characters.";
+                     return; 
+                }
 
-            document.getElementById('signup-button').disabled = true;
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged will handle the rest
-                showPage('home'); // Go to home after signup
-            } catch (error) {
-                console.error("Signup error:", error.message);
-                authErrorMessage.textContent = error.message; // Show error to user
-            } finally {
-                document.getElementById('signup-button').disabled = false;
-            }
-        });
+                const signupButton = document.getElementById('signup-button');
+                if (signupButton) signupButton.disabled = true;
+                
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    showPage('home'); // Go to home after signup
+                } catch (error) {
+                    console.error("Signup error:", error.message);
+                    if (authErrorMessage) authErrorMessage.textContent = error.message; // Show error to user
+                } finally {
+                    if (signupButton) signupButton.disabled = false;
+                }
+            });
+        } else {
+             if (!signupForm) console.error("Signup form not found.");
+             if (!auth) console.error("Firebase Auth not initialized, signup disabled.");
+        }
 
-        // Login
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = loginForm.email.value;
-            const password = loginForm.password.value;
-            authErrorMessage.textContent = '';
-            document.getElementById('login-button').disabled = true;
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged will handle the rest
-                showPage('home'); // Go to home after login
-            } catch (error) {
-                console.error("Login error:", error.message);
-                authErrorMessage.textContent = error.message; // Show error to user
-            } finally {
-                document.getElementById('login-button').disabled = false;
-            }
-        });
+        if (loginForm && auth) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const emailInput = document.getElementById('login-email');
+                const passwordInput = document.getElementById('login-password');
+                const email = emailInput ? emailInput.value : '';
+                const password = passwordInput ? passwordInput.value : '';
 
-        // Logout
-        document.getElementById('nav-logout').addEventListener('click', (e) => { 
+                if (authErrorMessage) authErrorMessage.textContent = '';
+                const loginButton = document.getElementById('login-button');
+                if (loginButton) loginButton.disabled = true;
+
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showPage('home'); // Go to home after login
+                } catch (error) {
+                    console.error("Login error:", error.message);
+                   if (authErrorMessage) authErrorMessage.textContent = error.message; // Show error to user
+                } finally {
+                   if (loginButton) loginButton.disabled = false;
+                }
+            });
+        } else {
+             if (!loginForm) console.error("Login form not found.");
+             if (!auth) console.error("Firebase Auth not initialized, login disabled.");
+        }
+
+
+        // Logout Listeners
+        document.getElementById('nav-logout')?.addEventListener('click', (e) => { 
             e.preventDefault(); 
-            signOut(auth);
+            if (auth) signOut(auth); // Check auth exists
             showPage('home'); 
         });
-        document.getElementById('nav-mobile-logout').addEventListener('click', (e) => { 
+        document.getElementById('nav-mobile-logout')?.addEventListener('click', (e) => { 
             e.preventDefault(); 
-            signOut(auth);
+            if (auth) signOut(auth); // Check auth exists
             showPage('home'); 
         });
 
-    </script>
+     </script>
 </body>
 </html>
-
-
-
