@@ -880,95 +880,89 @@
             });
         }
         
-        // --- Modal Logic ---
-        const modal = document.getElementById('ticketModal');
-        const qrcodeContainer = document.getElementById('modal-qrcode');
-        let qrcode = null; 
-        
-        // --- FIX: Moved QR Code initialization to DOMContentLoaded ---
-        document.addEventListener('DOMContentLoaded', () => {
-             if (qrcodeContainer) {
-                try {
-                     // Ensure QRCode library is loaded
-                     if (typeof QRCode !== 'undefined') {
-                        qrcode = new QRCode(qrcodeContainer, { width: 180, height: 180 });
-                        console.log("QRCode initialized"); // Log success
-                     } else {
-                         console.error("QRCode library definition not found.");
-                         qrcodeContainer.innerHTML = '<p class="text-red-500">QR Code library not loaded.</p>';
-                     }
-                } catch(e) {
-                    console.error("Failed to initialize QRCode:", e);
-                    qrcodeContainer.innerHTML = '<p class="text-red-500">QR Code init failed.</p>';
-                }
-            } else {
-                 console.error("QR Code container element ('modal-qrcode') not found in HTML.");
-            }
-        });
+// --- Modal Logic ---
+const modal = document.getElementById('ticketModal');
+const qrcodeContainer = document.getElementById('modal-qrcode');
 
-
-        function showTicketModal(ticket) {
-            if (!modal) { console.error("Modal element not found"); return; }
-             // Check required elements exist
-             const modalNameEl = document.getElementById('modal-name');
-             const modalFromEl = document.getElementById('modal-from');
-             const modalToEl = document.getElementById('modal-to');
-             const modalDateEl = document.getElementById('modal-date');
-             const modalTicketIdEl = document.getElementById('modal-ticket-id');
-             if (!modalNameEl || !modalFromEl || !modalToEl || !modalDateEl || !modalTicketIdEl) {
-                 console.error("One or more modal elements not found.");
-                 return;
-             }
-             
-            if (!qrcode) { 
-                console.error("QRCode object not initialized. Cannot show QR code.");
-                if (qrcodeContainer) qrcodeContainer.innerHTML = '<p class="text-red-500">QR Code cannot be shown.</p>';
-                 // Still show the rest of the modal, just without QR
-            }
-             // Populate modal fields (use fallbacks)
-            modalNameEl.textContent = ticket.name || 'N/A';
-            modalFromEl.textContent = ticket.from || 'N/A';
-            modalToEl.textContent = ticket.to || 'N/A';
-            const date = ticket.createdAt instanceof Date ? ticket.createdAt : (ticket.createdAt?.toDate ? ticket.createdAt.toDate() : new Date()); // Safer date conversion
-            modalDateEl.textContent = date.toLocaleString();
-            modalTicketIdEl.textContent = `ID: ${ticket.id}`;
+function showTicketModal(ticket) {
+    if (!modal) { console.error("Modal element not found"); return; }
+    
+    // Check required elements exist
+    const modalNameEl = document.getElementById('modal-name');
+    const modalFromEl = document.getElementById('modal-from');
+    const modalToEl = document.getElementById('modal-to');
+    const modalDateEl = document.getElementById('modal-date');
+    const modalTicketIdEl = document.getElementById('modal-ticket-id');
+    
+    if (!modalNameEl || !modalFromEl || !modalToEl || !modalDateEl || !modalTicketIdEl) {
+        console.error("One or more modal elements not found.");
+        return;
+    }
+    
+    // Populate modal fields (use fallbacks)
+    modalNameEl.textContent = ticket.name || 'N/A';
+    modalFromEl.textContent = ticket.from || 'N/A';
+    modalToEl.textContent = ticket.to || 'N/A';
+    const date = ticket.createdAt instanceof Date ? ticket.createdAt : (ticket.createdAt?.toDate ? ticket.createdAt.toDate() : new Date());
+    modalDateEl.textContent = date.toLocaleString();
+    modalTicketIdEl.textContent = `ID: ${ticket.id}`;
+    
+    // Generate QR code
+    if (qrcodeContainer) {
+        try {
+            // Completely clear the container
+            qrcodeContainer.innerHTML = '';
             
-            // Generate QR code only if qrcode exists
-            if (qrcode) {
-                try {
-                     // Clear previous QR before making new one
-                     if (qrcodeContainer) qrcodeContainer.innerHTML = ''; 
-                     qrcode.makeCode(JSON.stringify({
-                        ticketId: ticket.id, 
-                        city: ticket.city || 'N/A', 
-                        mode: ticket.mode || 'N/A', 
-                        from: ticket.from || 'N/A', 
-                        to: ticket.to || 'N/A'
-                    }));
-                    console.log("QR Code generated for ticket:", ticket.id); // Log success
-                 } catch(e) {
-                     console.error("Error generating QR code:", e);
-                     if (qrcodeContainer) qrcodeContainer.innerHTML = '<p class="text-red-500">Error generating QR code.</p>'; 
-                 }
-            } 
-
-            modal.classList.remove('hidden'); // Show the modal
-
-            // --- FIX: Update icons within the modal ---
-             updateLucideIcons();
+            // Check if QRCode library is loaded
+            if (typeof QRCode !== 'undefined') {
+                // Create a fresh QRCode instance each time
+                const qrData = JSON.stringify({
+                    ticketId: ticket.id, 
+                    city: ticket.city || 'N/A', 
+                    mode: ticket.mode || 'N/A', 
+                    from: ticket.from || 'N/A', 
+                    to: ticket.to || 'N/A'
+                });
+                
+                new QRCode(qrcodeContainer, {
+                    text: qrData,
+                    width: 180,
+                    height: 180,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                
+                console.log("QR Code generated for ticket:", ticket.id);
+            } else {
+                console.error("QRCode library not loaded.");
+                qrcodeContainer.innerHTML = '<p class="text-red-500 text-sm">QR Code library not available.</p>';
+            }
+        } catch(e) {
+            console.error("Error generating QR code:", e);
+            qrcodeContainer.innerHTML = '<p class="text-red-500 text-sm">Error generating QR code.</p>'; 
         }
+    } else {
+        console.error("QR Code container not found.");
+    }
 
-        const closeModalButton = document.getElementById('close-modal');
-        if (closeModalButton && modal) {
-            closeModalButton.addEventListener('click', () => modal.classList.add('hidden'));
+    modal.classList.remove('hidden'); // Show the modal
+
+    // Update icons within the modal
+    updateLucideIcons();
+}
+
+const closeModalButton = document.getElementById('close-modal');
+if (closeModalButton && modal) {
+    closeModalButton.addEventListener('click', () => modal.classList.add('hidden'));
+}
+if (modal) {
+    modal.addEventListener('click', (e) => { 
+        if (e.target === modal) {
+            modal.classList.add('hidden'); 
         }
-        if (modal) {
-             modal.addEventListener('click', (e) => { 
-                if (e.target === modal) { // Only close if clicking the background overlay
-                    modal.classList.add('hidden'); 
-                }
-            });
-        }
+    });
+}
 
         // --- NEW: Login/Signup/Logout Event Listeners ---
         const signupForm = document.getElementById('signup-form');
@@ -1052,3 +1046,4 @@
      </script>
 </body>
 </html>
+
