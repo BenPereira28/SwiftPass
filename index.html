@@ -700,13 +700,21 @@
         // --- Display Tickets ---
         // ... (No changes to this section's logic) ...
         function loadTickets() {
-            if (!db || !userId) return; 
+            if (!firebaseAppInitialized || !db || !userId) {
+                 const ticketHistory = document.getElementById('ticket-history');
+                 if(ticketHistory) ticketHistory.innerHTML = '<p class="text-center text-gray-500">Backend not ready...</p>';
+                 return; 
+            }
             
-            const collectionPath = `/artifacts/${appId}/public/data/tickets`;
-            const ticketsQuery = query(collection(db, collectionPath), where("userId", "==", userId));
+            // --- PATH FIX: Must match security rules ---
+            const collectionPath = `/artifacts/${appId}/public/data/userTickets/${userId}/tickets`;
+            // --- QUERY FIX: Remove 'where' clause, it's not needed and will fail without an index ---
+            const ticketsQuery = query(collection(db, collectionPath)); 
+            console.log(`Loading tickets from: ${collectionPath} for user: ${userId}`); // Log details
             
             onSnapshot(ticketsQuery, (snapshot) => {
                 const ticketHistory = document.getElementById('ticket-history');
+                 if (!ticketHistory) { console.error("Ticket history element not found."); return; } 
                 if (snapshot.empty) {
                     ticketHistory.innerHTML = '<p class="text-center text-gray-500">You have no tickets yet.</p>';
                     return;
@@ -715,37 +723,60 @@
                 const allTickets = [];
                 snapshot.forEach(doc => allTickets.push({id: doc.id, ...doc.data()}));
                 
+                // Sort client-side for reliable ordering
                 allTickets.sort((a, b) => {
-                    const dateA = a.createdAt ? a.createdAt.toDate() : 0;
-                    const dateB = b.createdAt ? b.createdAt.toDate() : 0;
-                    return dateB - dateA;
+                    const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0; // Safer access
+                    const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0; // Safer access
+                    return dateB - dateA; // Newest first
                 });
 
                 allTickets.forEach(ticket => {
                     const ticketElement = document.createElement('div');
                     ticketElement.className = 'bg-white p-4 rounded-lg shadow border flex justify-between items-center';
-                    const issuedDate = ticket.createdAt ? ticket.createdAt.toDate().toLocaleDateString() : 'Just now';
+                    const issuedDate = ticket.createdAt?.toDate ? ticket.createdAt.toDate().toLocaleDateString() : 'N/A'; // Safer access
+                    // Use fallback values if properties are missing
+                    const fromLocation = ticket.from || 'Unknown';
+                    const toLocation = ticket.to || 'Unknown';
+                    const passengerName = ticket.name || 'N/A';
+                    const ticketCity = ticket.city || 'N/A';
+                    const ticketMode = ticket.mode || 'N/A';
+
                     ticketElement.innerHTML = `
                         <div>
-                            <p class="font-bold">${ticket.from} <i data-lucide="arrow-right" class="inline-block w-4 h-4"></i> ${ticket.to}</p>
-                            <p class="text-sm text-gray-500">For: ${ticket.name} &bull; ${ticket.city} ${ticket.mode} &bull; Issued: ${issuedDate}</p>
+                            <p class="font-bold">${fromLocation} <i data-lucide="arrow-right" class="inline-block w-4 h-4"></i> ${toLocation}</p>
+                            <p class="text-sm text-gray-500">For: ${passengerName} &bull; ${ticketCity} ${ticketMode} &bull; Issued: ${issuedDate}</p>
                         </div>
                         <button class="view-ticket-btn bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md text-sm font-semibold" data-id="${ticket.id}">View</button>
                     `;
                     ticketHistory.appendChild(ticketElement);
                 });
-                lucide.createIcons(); 
+                // --- FIX: Update icons after adding ticket elements ---
+                updateLucideIcons();
 
                 document.querySelectorAll('.view-ticket-btn').forEach(button => {
                     button.addEventListener('click', () => {
                         const ticketId = button.dataset.id;
                         const ticketData = allTickets.find(t => t.id === ticketId);
-                        showTicketModal(ticketData);
+                         if (ticketData) { // Check if ticket data was found
+                            showTicketModal(ticketData);
+                         } else {
+                            console.error(`Ticket data not found for ID: ${ticketId}`);
+                         }
                     });
                 });
             }, (error) => {
                 console.error("Error loading tickets: ", error);
-                document.getElementById('ticket-history').innerHTML = '<p class="text-center text-red-500">Error loading tickets.</p>';
+                 const ticketHistory = document.getElementById('ticket-history');
+                 if (ticketHistory) { // Check element exists
+                     if (error.code === 'permission-denied' || error.message.includes('permission')) { // Check common permission errors
+                         ticketHistory.innerHTML = `<p class="text-center text-red-500">Error: Insufficient permissions to load tickets. Please check Firestore security rules for path: ${collectionPath}.</I></p>`;
+                     } else if (error.message.includes('offline')) {
+                          ticketHistory.innerHTML = `<p class="text-center text-orange-500">Offline. Cannot load tickets right now.</p>`;
+                     }
+                      else {
+                        ticketHistory.innerHTML = `<p class="text-center text-red-500">Error loading tickets: ${error.message}.</p>`;
+                     }
+                 }
             });
         }
         
@@ -849,5 +880,6 @@
     </script>
 </body>
 </html>
+
 
 
